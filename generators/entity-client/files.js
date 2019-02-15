@@ -17,8 +17,7 @@
  * limitations under the License.
  */
 const constants = require('generator-jhipster/generators/generator-constants');
-const utils = require('./utils');
-const clientUtils = require('../client/utils');
+const utils = require('../utils');
 
 /* Constants use throughout */
 const CLIENT_TEST_SRC_DIR = constants.CLIENT_TEST_SRC_DIR;
@@ -127,19 +126,19 @@ function writeFiles() {
     // Add entity to menu
     const className = this.entityClass;
     const entityName = this.entityInstance;
+    const entityAngularName = this.entityAngularName;
     utils.addEntityToMenu(this, this.entityFileName, this.entityTranslationKeyMenu, className);
 
     // Add entity paths to routing system
-    utils.addEntityToRouterImport(this, className, this.entityFileName, this.entityFolderName);
-    utils.addEntityToRouter(this, entityName, this.entityFileName, className);
+    utils.addEntityToRouterImport(this, entityAngularName, this.entityFileName, this.entityFolderName);
+    utils.addEntityToRouter(this, entityName, this.entityFileName, entityAngularName);
 
     // Add entity services to main
     utils.addEntityServiceToMainImport(this, className, this.entityFileName, this.entityFolderName);
-    utils.addEntityServiceToMainConst(this, entityName, className);
-    utils.addEntityServiceToMain(this, entityName);
+    utils.addEntityServiceToMain(this, entityName, className);
 
     if (!this.enableTranslation) {
-        clientUtils.replaceTranslation(this, [
+        utils.replaceTranslation(this, [
             `app/entities/${this.entityFolderName}/${this.entityFileName}.vue`,
             `app/entities/${this.entityFolderName}/${this.entityFileName}-update.vue`,
             `app/entities/${this.entityFolderName}/${this.entityFileName}-details.vue`

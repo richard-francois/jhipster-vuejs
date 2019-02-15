@@ -1,9 +1,7 @@
 import axios from 'axios';
 import Component from 'vue-class-component';
 import { Vue, Inject } from 'vue-property-decorator';
-
-import Principal from '../principal';
-
+import AccountService from '@/account/account.service';
 @Component({
   watch: {
     $route() {
@@ -12,13 +10,12 @@ import Principal from '../principal';
   }
 })
 export default class LoginForm extends Vue {
-
+  @Inject('accountService')
+  private accountService: () => AccountService;
   public authenticationError = null;
   public login = null;
   public password = null;
   public rememberMe: boolean = null;
-
-  @Inject('principal') private principal: () => Principal;
 
   public doLogin(): void {
     <%_ if (authenticationType === 'jwt') { _%>
@@ -37,9 +34,9 @@ export default class LoginForm extends Vue {
         }
     <%_ } else { _%>
     const data =
-      'j_username=' +
+      'username=' +
       encodeURIComponent(this.login) +
-      '&j_password=' +
+      '&password=' +
       encodeURIComponent(this.password) +
       '&remember-me=' +
       this.rememberMe +
@@ -53,7 +50,7 @@ export default class LoginForm extends Vue {
       <%_ } _%>
         this.authenticationError = false;
         this.$root.$emit('bv::hide::modal','login-page');
-        this.principal().retrieveAccount();
+        this.accountService().retrieveAccount();
       }).catch(()=> {
         this.authenticationError = true;
       });

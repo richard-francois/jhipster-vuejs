@@ -18,7 +18,7 @@
  */
 const mkdirp = require('mkdirp');
 const constants = require('generator-jhipster/generators/generator-constants');
-const utils = require('./utils');
+const utils = require('../utils');
 
 const MAIN_SRC_DIR = constants.CLIENT_MAIN_SRC_DIR;
 const TEST_SRC_DIR = constants.CLIENT_TEST_SRC_DIR;
@@ -185,6 +185,12 @@ const vueFiles = {
     ],
     accountModule: [
         {
+            path: VUE_DIR,
+            templates: [
+                'account/account.service.ts'
+            ]
+        },
+        {
             condition: generator => generator.authenticationType !== 'oauth2',
             path: VUE_DIR,
             templates: [
@@ -192,13 +198,14 @@ const vueFiles = {
                 'account/change-password/change-password.component.ts',
                 'account/login-form/login-form.vue',
                 'account/login-form/login-form.component.ts',
-                'account/login-modal.service.ts',
-                'account/principal.ts',
+                'account/login.service.ts',
                 'account/register/register.vue',
                 'account/register/register.component.ts',
                 'account/register/register.service.ts',
-                'account/reset-password/reset-password.vue',
-                'account/reset-password/reset-password.component.ts',
+                'account/reset-password/init/reset-password-init.vue',
+                'account/reset-password/init/reset-password-init.component.ts',
+                'account/reset-password/finish/reset-password-finish.vue',
+                'account/reset-password/finish/reset-password-finish.component.ts',
                 'account/settings/settings.vue',
                 'account/settings/settings.component.ts',
                 'account/activate/activate.component.ts',
@@ -212,6 +219,13 @@ const vueFiles = {
             templates: [
                 'account/sessions/sessions.vue',
                 'account/sessions/sessions.component.ts'
+            ]
+        },
+        {
+            condition: generator => generator.authenticationType === 'oauth2',
+            path: VUE_DIR,
+            templates: [
+                'account/login.service.ts'
             ]
         }
     ],
@@ -288,16 +302,35 @@ const vueFiles = {
             path: TEST_SRC_DIR,
             templates: [
                 'jest.conf.js',
+                'spec/app/account/account.service.spec.ts',
+                'spec/app/core/home/home.component.spec.ts',
                 'spec/app/core/jhi-footer/jhi-footer.component.spec.ts',
+                'spec/app/core/jhi-navbar/jhi-navbar.component.spec.ts',
                 'spec/app/core/ribbon/ribbon.component.spec.ts',
                 'spec/app/admin/configuration/configuration.component.spec.ts',
                 'spec/app/admin/docs/docs.component.spec.ts',
                 'spec/app/admin/health/health.component.spec.ts',
+                'spec/app/admin/health/health-modal.component.spec.ts',
                 'spec/app/admin/health/health.service.spec.ts',
                 'spec/app/admin/logs/logs.component.spec.ts',
                 'spec/app/admin/audits/audits.component.spec.ts',
                 'spec/app/admin/metrics/metrics.component.spec.ts',
                 'spec/app/admin/metrics/metrics-modal.component.spec.ts'
+            ]
+        },
+        {
+            condition: generator => generator.authenticationType === 'oauth2',
+            path: TEST_SRC_DIR,
+            templates: [
+                'spec/app/account/login.service.spec.ts'
+            ]
+        },
+        {
+            condition: generator => generator.authenticationType === 'session',
+            path: TEST_SRC_DIR,
+            templates: [
+                'spec/app/account/sessions/sessions.component.spec.ts',
+                'spec/app/account/login.service.spec.ts'
             ]
         },
         {
@@ -307,7 +340,8 @@ const vueFiles = {
                 'spec/app/account/change-password/change-password.component.spec.ts',
                 'spec/app/account/login-form/login-form.component.spec.ts',
                 'spec/app/account/register/register.component.spec.ts',
-                'spec/app/account/reset-password/reset-password.component.spec.ts',
+                'spec/app/account/reset-password/init/reset-password-init.component.spec.ts',
+                'spec/app/account/reset-password/finish/reset-password-finish.component.spec.ts',
                 'spec/app/account/settings/settings.component.spec.ts',
                 'spec/app/account/activate/activate.component.spec.ts'
             ]
@@ -383,7 +417,8 @@ function writeFiles() {
             'app/account/activate/activate.vue',
             'app/account/login-form/login-form.vue',
             'app/account/register/register.vue',
-            'app/account/reset-password/reset-password.vue',
+            'app/account/reset-password/init/reset-password-init.vue',
+            'app/account/reset-password/finish/reset-password-finish.vue',
             'app/account/settings/settings.vue',
             'app/admin/user-management/user-management.vue',
             'app/admin/user-management/user-management-view.vue',

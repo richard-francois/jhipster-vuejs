@@ -19,15 +19,19 @@ import { DATE_TIME_LONG_FORMAT, INSTANT_FORMAT, ZONED_DATE_TIME_FORMAT } from '@
 
 <%_
     const importEntitiesSeen = [entityAngularName];
+    let hasManyToMany = false;
     for (idx in relationships) {
     const otherEntityAngularName = relationships[idx].otherEntityAngularName;
     const otherEntityFileName = relationships[idx].otherEntityFileName;
     const otherEntityFolderName = relationships[idx].otherEntityFileName;
     const otherEntityModelName = relationships[idx].otherEntityModelName;
+    if (relationships[idx].relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) {
+      hasManyToMany = true;
+    }
 _%>
-  <% if (otherEntityAngularName === 'User') { %>
+  <% if (otherEntityAngularName === 'User' && authenticationType !== "oauth2") { %>
 import UserService from '@/admin/user-management/user-management.service';
-  <% } else if (!importEntitiesSeen.includes(otherEntityAngularName)) { %>
+  <% } else if (otherEntityAngularName !== 'User' && !importEntitiesSeen.includes(otherEntityAngularName)) { %>
 import <%= otherEntityAngularName %>Service from '../<%= otherEntityFolderName %>/<%= otherEntityFileName %>.service';
 import { I<%= otherEntityAngularName %> } from '@/shared/model/<%= otherEntityModelName %>.model';
   <% } %>
@@ -76,12 +80,15 @@ export default class <%= entityAngularName %>Update extends <% if (fieldsContain
     const otherEntityName = relationships[idx].otherEntityName;
     const otherEntityNamePlural = relationships[idx].otherEntityNamePlural;
     const otherEntityAngularName = relationships[idx].otherEntityAngularName;
+    if (!(otherEntityAngularName === 'User' && authenticationType === "oauth2")) {
   _%>
   <%_ if (!entitiesSeen.includes(otherEntityAngularName)) { %>
   @Inject('<%= otherEntityName %>Service') private <%= otherEntityName %>Service : () => <%= otherEntityAngularName %>Service;
   <%_ } _%>
+  <%_ if (!entitiesSeen.includes(otherEntityNamePlural)) { %>
   public <%= otherEntityNamePlural %> : <% if (otherEntityAngularName === 'User') { %>Array<any><%_ } else { _%>I<%= otherEntityAngularName %>[]<%_ } _%> = [];
-  <%_ entitiesSeen.push(otherEntityAngularName); } _%>
+  <%_ } _%>
+  <%_ entitiesSeen.push(otherEntityAngularName);entitiesSeen.push(otherEntityNamePlural); } } _%>
   public isSaving = false;
 
   beforeRouteEnter(to, from, next) {
@@ -94,6 +101,19 @@ export default class <%= entityAngularName %>Update extends <% if (fieldsContain
       <%_ } _%>
     });
   }
+
+  <%_ if (hasManyToMany) { _%>
+  created(): void {
+    <%_
+      for (idx in relationships) {
+      const otherEntityNamePlural = relationships[idx].otherEntityNamePlural;
+      if (relationships[idx].relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) {
+      const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
+    _%>
+    this.<%= entityInstance %>.<%= relationshipFieldNamePlural %> = [];
+    <%_ } } _%>
+  }
+  <%_ } _%>
 
   public save() : void {
     this.isSaving = true;
@@ -161,21 +181,6 @@ export default class <%= entityAngularName %>Update extends <% if (fieldsContain
   public retrieve<%= entityAngularName %>(<%= entityInstance %>Id) : void {
     this.<%= entityInstance %>Service().find(<%= entityInstance %>Id).then((res) => {
       this.<%= entityInstance %> = res;
-
-      <%_ for (idx in fields) {
-          const fieldName = fields[idx].fieldName;
-          const fieldType = fields[idx].fieldType;
-          if ([ 'Instant' ].includes(fieldType)) { _%>
-            if (this.<%= entityInstance %>.<%= fieldName %>) {
-              this.<%= entityInstance %>.<%= fieldName %> = parse(this.<%= entityInstance %>.<%= fieldName %>.toString(), INSTANT_FORMAT, new Date());
-            }
-          <%_ }
-          if ([ 'ZonedDateTime' ].includes(fieldType)) { _%>
-            if (this.<%= entityInstance %>.<%= fieldName %>) {
-              this.<%= entityInstance %>.<%= fieldName %> = parse(this.<%= entityInstance %>.<%= fieldName %>.toString(), ZONED_DATE_TIME_FORMAT, new Date());
-            }
-          <%_ }
-      } _%>
     });
   }
 
@@ -201,19 +206,16 @@ export default class <%= entityAngularName %>Update extends <% if (fieldsContain
   <%_ } _%>
   public initRelationships() : void {
     <%_
-        let hasManyToMany = false;
         for (idx in relationships) {
         const otherEntityName = relationships[idx].otherEntityName;
         const otherEntityNamePlural = relationships[idx].otherEntityNamePlural;
         const otherEntityAngularName = relationships[idx].otherEntityAngularName;
-        if (relationships[idx].relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) {
-            hasManyToMany = true;
-        }
+        if (!(otherEntityAngularName === 'User' && authenticationType === "oauth2")) {
     _%>
     this.<%= otherEntityName %>Service().retrieve().then((res) => {
       this.<%= otherEntityNamePlural %> = res.data;
     });
-    <%_ } _%>
+    <%_ } } _%>
   }
 
   <%_ if (hasManyToMany) { _%>

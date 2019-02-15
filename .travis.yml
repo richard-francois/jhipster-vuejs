@@ -47,7 +47,7 @@ env:
     - JHI_LIB_BRANCH=release
     # if JHI_GEN_BRANCH value is release, use the release from NPM
     - JHI_GEN_REPO=https://github.com/jhipster/generator-jhipster.git
-    - JHI_GEN_BRANCH=master
+    - JHI_GEN_BRANCH=v5.8.1
     # specific config
     - SPRING_OUTPUT_ANSI_ENABLED=ALWAYS
     - SPRING_JPA_SHOW_SQL=false
@@ -60,7 +60,8 @@ env:
     - JHI_APP=vuejs-fulli18n-es
     - JHI_APP=vuejs-gateway
     - JHI_APP=vuejs-gradle-session
-    - JHI_APP=vuejs-ws JHI_PROTRACTOR=1
+    - JHI_APP=vuejs-ws-theme JHI_PROTRACTOR=1
+    - JHI_APP=vuejs-oauth2 JHI_PROTRACTOR=1
 
 #----------------------------------------------------------------------
 # Install all tools and check configuration

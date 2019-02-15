@@ -2,18 +2,11 @@ import { shallowMount, createLocalVue, Wrapper } from '@vue/test-utils';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
+import AlertService from '@/shared/alert/alert.service';
 import * as config from '@/shared/config/config';
 import UserManagement from '@/admin/user-management/user-management.vue';
 import UserManagementClass from '@/admin/user-management/user-management.component';
 import UserManagementService from '@/admin/user-management/user-management.service';
-import Principal from '@/account/principal';
-import router from '@/router';
-<%_ if (enableTranslation) { _%>
-import TranslationService from '@/locale/translation.service';
-<%_ } _%>
-<%_ if (websocket === 'spring-websocket') { _%>
-import TrackerService from '@/admin/tracker/tracker.service';
-<%_ } _%>
 
 const localVue = createLocalVue();
 const mockedAxios: any = axios;
@@ -24,6 +17,7 @@ const i18n = config.initI18N(localVue);
 <%_ } _%>
 const store = config.initVueXStore(localVue);
 localVue.component('font-awesome-icon', FontAwesomeIcon);
+localVue.component('b-alert', {});
 localVue.component('router-link', {});
 localVue.directive('b-modal', {});
 
@@ -61,7 +55,7 @@ describe('UserManagement Component', () => {
         bModal: true
       },
       provide: {
-        principal: () => new Principal(store, <% if (enableTranslation) { %>new TranslationService(store), i18n, <% } %><% if (authenticationType === 'session') { %> { get: () => {} }, <% } %><% if (websocket === 'spring-websocket') { %>new TrackerService(router), <% } %>router),
+        alertService: () => new AlertService(store),
         userService: () => new UserManagementService()
       }
     });

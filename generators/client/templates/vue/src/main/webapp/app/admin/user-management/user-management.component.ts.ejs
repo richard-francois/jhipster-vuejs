@@ -1,11 +1,11 @@
 import { Component, Inject, Vue } from 'vue-property-decorator';
 import UserManagementService from './user-management.service';
-import Principal from '@/account/principal';
+import AlertService from '@/shared/alert/alert.service';
 
 @Component
 export default class <%=jhiPrefixCapitalized%>UserManagementComponent extends Vue {
+  @Inject('alertService') private alertService: () => AlertService;
   @Inject('userService') private userManagementService: () => UserManagementService;
-  @Inject('principal') private principal: () => Principal;
   public error = '';
   public success = '';
   public users: any[] = [];
@@ -17,6 +17,23 @@ export default class <%=jhiPrefixCapitalized%>UserManagementComponent extends Vu
   public reverse = false;
   public totalItems = 0;
   public removeId: number = null;
+
+  public dismissCountDown: number = this.$store.getters.dismissCountDown;
+  public dismissSecs: number = this.$store.getters.dismissSecs;
+  public alertType: string = this.$store.getters.alertType;
+  public alertMessage: any = this.$store.getters.alertMessage;
+
+  public getAlertFromStore() {
+    this.dismissCountDown = this.$store.getters.dismissCountDown;
+    this.dismissSecs = this.$store.getters.dismissSecs;
+    this.alertType = this.$store.getters.alertType;
+    this.alertMessage = this.$store.getters.alertMessage;
+  }
+
+  public countDownChanged(dismissCountDown: number) {
+    this.alertService().countDownChanged(dismissCountDown);
+    this.getAlertFromStore();
+  }
 
   public mounted(): void {
     this.loadAll();
@@ -77,7 +94,18 @@ export default class <%=jhiPrefixCapitalized%>UserManagementComponent extends Vu
   <%_ } _%>
 
   public deleteUser(): void {
-    this.userManagementService().remove(this.removeId).then(() => {
+    this.userManagementService().remove(this.removeId).then(res => {
+      <%_
+      const headerAlert = `X-${angularAppName}-alert`.toLowerCase();
+      const headerParams = `X-${angularAppName}-params`.toLowerCase();
+      if (enableTranslation) {
+      _%>
+      const message = this.$t(res.headers['<%=headerAlert%>'], { param: res.headers['<%=headerParams%>'] });
+      <%_ } else {_%>
+      const message = res.headers['<%=headerAlert%>'];
+      <%_ } _%>
+      this.alertService().showAlert(message, 'danger');
+      this.getAlertFromStore();
       this.removeId = null;
       this.loadAll();
     });
@@ -88,6 +116,6 @@ export default class <%=jhiPrefixCapitalized%>UserManagementComponent extends Vu
   }
 
   public get username(): string {
-    return this.principal().username;
+    return this.$store.getters.account ? this.$store.getters.account.login : '';
   }
 }

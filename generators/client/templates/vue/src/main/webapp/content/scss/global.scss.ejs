@@ -1,4 +1,4 @@
-<%#Copyright 2013-2018 the original author or authors from the JHipster project.
+<%#Copyright 2013-2019 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/ for
         more information. Licensed under the Apache License,
@@ -28,15 +28,17 @@ h4 {
 }
 
 body {
-    background: #e4e5e6;
     margin: 0;
     font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif;
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.5;
-    color: #212529;
     text-align: left;
+    <%_ if (clientTheme === 'none') { _%>
+    color: #212529;
+    background: #e4e5e6;
     background-color: #fff;
+    <%_ } _%>
 }
 
 a {
@@ -106,6 +108,9 @@ Generic styles
     padding: 1.5%;
     margin-top: 20px;
     border: none;
+    <%_ if (clientTheme !== 'none') { _%>
+    background: inherit;
+    <%_ } _%>
 }
 
 .error {
